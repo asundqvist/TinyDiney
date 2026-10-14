@@ -1,5 +1,7 @@
 package se.edugrade.java25.restaurant.dto;
 
+import se.edugrade.java25.restaurant.model.Restaurant;
+
 public record RestaurantResponse(
         Long id,
         String name,
@@ -7,4 +9,12 @@ public record RestaurantResponse(
         String cuisine,
         int seats
 ) {
+    public static RestaurantResponse from(Restaurant restaurant) {
+        return new RestaurantResponse(
+                restaurant.getId(),
+                restaurant.getName(),
+                restaurant.getCity(),
+                restaurant.getCuisine(),
+                restaurant.getSeats());
+    }
 }
