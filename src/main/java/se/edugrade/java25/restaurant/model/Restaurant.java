@@ -1,16 +1,12 @@
 package se.edugrade.java25.restaurant.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Restaurant {
 
     @Id
@@ -28,4 +24,18 @@ public class Restaurant {
 
     @Column(nullable = false)
     private int seats;
+
+    public Restaurant(String name, String city, String cuisine, int seats) {
+        this.name = name;
+        this.city = city;
+        this.cuisine = cuisine;
+        this.seats = seats;
+    }
+
+    public void update(String name, String city, String cuisine, int seats) {
+        this.name = name;
+        this.city = city;
+        this.cuisine = cuisine;
+        this.seats = seats;
+    }
 }
