@@ -2,12 +2,14 @@ package se.edugrade.java25.restaurant.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import se.edugrade.java25.restaurant.api.RestaurantApi;
 import se.edugrade.java25.restaurant.dto.RestaurantRequest;
 import se.edugrade.java25.restaurant.dto.RestaurantPageResponse;
 import se.edugrade.java25.restaurant.dto.RestaurantResponse;
@@ -16,11 +18,11 @@ import se.edugrade.java25.restaurant.service.RestaurantService;
 @RestController
 @RequestMapping("/restaurants")
 @RequiredArgsConstructor
-public class RestaurantController {
+public class RestaurantController implements RestaurantApi {
     private final RestaurantService restaurantService;
 
     @GetMapping
-    public RestaurantPageResponse findAll(Pageable pageable) {
+    public RestaurantPageResponse findAll(@ParameterObject Pageable pageable) {
         return restaurantService.findAll(pageable);
     }
 

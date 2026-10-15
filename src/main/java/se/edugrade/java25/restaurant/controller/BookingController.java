@@ -13,6 +13,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import se.edugrade.java25.restaurant.api.BookingApi;
 import se.edugrade.java25.restaurant.dto.BookingRequest;
 import se.edugrade.java25.restaurant.dto.BookingPageResponse;
 import se.edugrade.java25.restaurant.dto.BookingResponse;
@@ -25,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 @RestController
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
-public class BookingController {
+public class BookingController implements BookingApi {
     private final BookingService bookingService;
 
 
@@ -89,4 +90,5 @@ public class BookingController {
         }
         return model;
     }
-}
+    }
+
