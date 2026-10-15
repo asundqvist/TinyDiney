@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import se.edugrade.java25.restaurant.dto.BookingRequest;
 import se.edugrade.java25.restaurant.dto.BookingPageResponse;
 import se.edugrade.java25.restaurant.dto.BookingResponse;
+import se.edugrade.java25.restaurant.dto.BookingResult;
 import se.edugrade.java25.restaurant.exceptions.ResourceNotFoundException;
 import se.edugrade.java25.restaurant.model.Booking;
 import se.edugrade.java25.restaurant.model.Restaurant;
@@ -57,7 +58,9 @@ public class BookingService {
         booking.confirm();
 
         BookingResponse confirmed = BookingResponse.from(bookingRepository.save(booking));
+
         notificationService.sendBookingConfirmation(confirmed);
+
         log.info(BOOKING_STATUS_CHANGED, confirmed.id(), confirmed.status());
         return confirmed;
     }
@@ -80,6 +83,15 @@ public class BookingService {
         BookingResponse canceled = BookingResponse.from(bookingRepository.save(booking));
         log.info(BOOKING_STATUS_CHANGED, canceled.id(), canceled.status());
         return canceled;
+    }
+
+    public BookingResult findByIdWithRevision(Long id) {
+        Booking booking = getBookingByIdOrThrow(id);
+
+        return new BookingResult(
+                BookingResponse.from(booking),
+                booking.getRevision()
+        );
     }
 
     private Booking getBookingByIdOrThrow(Long id) {
