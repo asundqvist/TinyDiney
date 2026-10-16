@@ -1,6 +1,8 @@
 package se.edugrade.java25.restaurant;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
+import se.edugrade.java25.restaurant.security.TestJwtConfiguration;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -11,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
  */
 @SpringBootTest
 @ActiveProfiles("test")
+@Import(TestJwtConfiguration.class)
 @DisplayName("Applikationens uppstart")
 class RestaurantApiApplicationTests {
 

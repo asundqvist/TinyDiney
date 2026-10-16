@@ -1,6 +1,9 @@
 package se.edugrade.java25.restaurant.integration;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import se.edugrade.java25.restaurant.security.TestJwtConfiguration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +19,16 @@ import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@Import(TestJwtConfiguration.class)
 @DisplayName("Restauranger")
 class RestaurantIntegrationTests {
     @LocalServerPort
     private int port;
+
+    @Autowired
+    private JwtEncoder jwtEncoder;
+
+    private String accessToken;
 
     @Autowired
     private BookingRepository bookingRepository;
@@ -29,6 +38,7 @@ class RestaurantIntegrationTests {
 
     @BeforeEach
     void clearDatabase() {
+        accessToken = TestJwtConfiguration.token(jwtEncoder, "ADMIN");
         bookingRepository.deleteAll();
         restaurantRepository.deleteAll();
     }
@@ -38,24 +48,24 @@ class RestaurantIntegrationTests {
     @DisplayName("En restaurang kan uppdateras och ändringarna sparas")
     void restaurantCanBeUpdated() {
         long first = createRestaurant();
-        given().port(port).contentType("application/json")
+        given().port(port).auth().oauth2(accessToken).contentType("application/json")
                 .body(Map.of("name", "Updated", "city", "Uppsala", "cuisine", "Swedish", "seats", 50))
                 .put("/restaurants/" + first).then().statusCode(200)
                 .body("id", equalTo((int) first), "seats", equalTo(50));
-        given().port(port).get("/restaurants/" + first).then().statusCode(200)
+        given().port(port).auth().oauth2(accessToken).get("/restaurants/" + first).then().statusCode(200)
                 .body("name", equalTo("Updated"), "city", equalTo("Uppsala"), "seats", equalTo(50));
     }
 
     @Test
     @DisplayName("Okänd restaurang ger 404 och ogiltiga uppgifter ger 400")
     void unknownRestaurantAndInvalidInputReturnErrors() {
-        given().port(port).get("/restaurants/9223372036854775807").then().statusCode(404)
+        given().port(port).auth().oauth2(accessToken).get("/restaurants/9223372036854775807").then().statusCode(404)
                 .contentType("application/problem+json").body("status", equalTo(404));
-        given().port(port).contentType("application/json").body("{}")
+        given().port(port).auth().oauth2(accessToken).contentType("application/json").body("{}")
                 .post("/restaurants").then().statusCode(400);
     }
     private long createRestaurant() {
-        return given().port(port).contentType("application/json")
+        return given().port(port).auth().oauth2(accessToken).contentType("application/json")
                 .body(Map.of("name", "Bella", "city", "Stockholm", "cuisine", "Italian", "seats", 40))
                 .post("/restaurants").then().statusCode(201).extract().jsonPath().getLong("id");
     }

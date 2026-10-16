@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:restaurant_test;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:${random.uuid};DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -9,3 +9,17 @@ spring:
     hibernate:
       ddl-auto: create-drop
     open-in-view: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://test-issuer.example/
+          audiences: https://restaurant-api
+
+auth0:
+  roles-claim: https://restaurant-api/roles
+
+app:
+  cors:
+    allowed-origin: http://localhost:5173
