@@ -2,15 +2,36 @@ spring:
   application:
     name: restaurant-api
 
-    datasource:
-      url: ${DB_URL}
-      username: ${DB_USERNAME}
-      password: ${DB_PASSWORD}
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:restaurant}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
 
-      jpa:
-        hibernate:
-          ddl-auto: update
-          open-in-view: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AUTH0_ISSUER_URI:https://dev-1yqf3iatkam5h1bp.eu.auth0.com/}
+          audiences: ${AUTH0_AUDIENCE:https://restaurant-api}
+
+
+  data:
+    web:
+     pageable:
+        default-page-size: 20
+        max-page-size: 100
 
 server:
   port: ${PORT:8080}
+
+auth0:
+  roles-claim: ${AUTH0_ROLES_CLAIM:https://restaurant-api/roles}
+
+app:
+  cors:
+    allowed-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
