@@ -1,6 +1,7 @@
 package se.edugrade.java25.restaurant.dto;
 
 import jakarta.validation.constraints.*;
+import se.edugrade.java25.restaurant.validation.BookingSlot;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +16,7 @@ public record BookingRequest(
         @Email String customerEmail,
 
         @NotNull(message = "Booking time is required")
-        @Future LocalDateTime time,
+        @Future @BookingSlot LocalDateTime time,
 
         @Min(value = 1, message = "Number of guests must be above 0")
         @Max(value = 10, message = "Number of guests can't be above 10")

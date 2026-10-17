@@ -57,11 +57,12 @@ class AuthorizationIntegrationTests {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
         RestaurantResponse restaurant = new RestaurantResponse(1L, "Bella", "Stockholm", "Italian", 40, null);
         BookingResponse booking = new BookingResponse(1L, 1L, "Guest", "guest@example.com",
-                LocalDateTime.now().plusDays(1), 2, BookingStatus.REQUESTED, "TD-ABCDEFGH-23456789", false);
+                LocalDateTime.now().plusDays(1).withHour(17).withMinute(0).withSecond(0).withNano(0), 2, BookingStatus.REQUESTED, "TD-ABCDEFGH-23456789", false);
         when(restaurantService.findAll(any())).thenReturn(new RestaurantPageResponse(List.of(restaurant), 0, 20, 1, 1));
         when(restaurantService.findById(1L)).thenReturn(restaurant);
         when(restaurantService.create(any())).thenReturn(restaurant);
         when(restaurantService.update(eq(1L), any())).thenReturn(restaurant);
+        when(bookingService.findMine(any())).thenReturn(new MyBookingPageResponse(List.of(), 0, 20, 0, 0));
         when(bookingService.findAll(any())).thenReturn(new BookingPageResponse(List.of(booking), 0, 20, 1, 1));
         when(bookingService.findByIdWithRevision(1L)).thenReturn(new BookingResult(booking, 1));
         when(bookingService.create(eq(1L), any())).thenReturn(booking);
@@ -142,7 +143,7 @@ class AuthorizationIntegrationTests {
                     : """
                       {"restaurantId":1,"customerName":"Guest","customerEmail":"guest@example.com",
                        "time":"%s","guests":2}
-                      """.formatted(LocalDateTime.now().plusDays(1));
+                      """.formatted(LocalDateTime.now().plusDays(1).withHour(17).withMinute(0).withSecond(0).withNano(0));
             request.contentType("application/json").content(body);
         }
         return request;
@@ -161,6 +162,7 @@ class AuthorizationIntegrationTests {
                 new Endpoint("PUT", "/restaurants/1", 200, Set.of("ADMIN")),
                 new Endpoint("GET", "/bookings", 200, everyone),
                 new Endpoint("GET", "/bookings/1", 200, everyone),
+                new Endpoint("GET", "/bookings/mine", 200, everyone),
                 new Endpoint("POST", "/bookings", 201, everyone),
                 new Endpoint("POST", "/bookings/1/confirm", 200, Set.of("STAFF", "ADMIN")),
                 new Endpoint("POST", "/bookings/1/seat", 200, Set.of("STAFF", "ADMIN")),

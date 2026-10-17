@@ -28,6 +28,10 @@ public class Booking {
     @Column(name = "booking_reference", length = 20, unique = true)
     private String reference;
 
+    @Version
+    @Column(nullable = false, columnDefinition = "bigint default 0")
+    private long version;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;

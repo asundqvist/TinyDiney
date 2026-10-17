@@ -86,6 +86,6 @@ class PaginationIntegrationTests {
 
     private Map<String, Object> bookingRequest(long restaurantId, int guests) {
         return Map.of("restaurantId", restaurantId, "customerName", "Guest",
-                "customerEmail", "guest@example.com", "time", LocalDateTime.now().plusDays(1).toString(), "guests", guests);
+                "customerEmail", "guest@example.com", "time", LocalDateTime.now().plusDays(1).withHour(17).withMinute(0).withSecond(0).withNano(0).toString(), "guests", guests);
     }
 }

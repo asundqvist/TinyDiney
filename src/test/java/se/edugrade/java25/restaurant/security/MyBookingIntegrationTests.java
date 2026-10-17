@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import static org.mockito.Mockito.doReturn;
 import se.edugrade.java25.restaurant.model.Booking;
 import se.edugrade.java25.restaurant.model.Restaurant;
 import se.edugrade.java25.restaurant.repositories.BookingRepository;
@@ -34,7 +36,7 @@ class MyBookingIntegrationTests {
         @Bean
         @Primary
         Clock fixedBookingClock() {
-            return Clock.fixed(Instant.parse("2099-06-01T10:00:00Z"), ZoneId.of("Europe/Stockholm"));
+            return Clock.fixed(Instant.parse("2099-06-01T12:00:00Z"), ZoneId.of("Europe/Stockholm"));
         }
     }
 
@@ -42,7 +44,7 @@ class MyBookingIntegrationTests {
     @Autowired private JwtEncoder encoder;
     @Autowired private BookingRepository bookings;
     @Autowired private RestaurantRepository restaurants;
-    @Autowired private Clock clock;
+    @MockitoSpyBean private Clock clock;
     private Restaurant restaurant;
     private String alice;
     private String bob;
@@ -118,7 +120,9 @@ class MyBookingIntegrationTests {
         long boundary = create(alice, LocalDateTime.now(clock).plusHours(1));
         given().port(port).auth().oauth2(alice).post("/bookings/" + boundary + "/cancel").then().statusCode(200);
 
-        long tooLate = create(alice, LocalDateTime.now(clock).plusHours(1).minusSeconds(1));
+        long tooLate = create(alice, LocalDateTime.now(clock).plusHours(1));
+        Instant justAfterBoundary = clock.instant().plusSeconds(1);
+        doReturn(justAfterBoundary).when(clock).instant();
         given().port(port).auth().oauth2(alice).get("/bookings/mine").then().statusCode(200)
                 .body("content.find { it.id == " + tooLate + " }.cancellable", equalTo(false));
         given().port(port).auth().oauth2(alice).post("/bookings/" + tooLate + "/cancel").then().statusCode(409)
@@ -126,6 +130,34 @@ class MyBookingIntegrationTests {
         assertEquals("REQUESTED", bookings.findById(tooLate).orElseThrow().getBookingStatus().name());
         given().port(port).auth().oauth2(staff).post("/bookings/" + tooLate + "/cancel").then().statusCode(200);
         assertEquals(2, bookings.findById(tooLate).orElseThrow().getStaffUpdateRevision());
+    }
+
+    @Test
+    void bookingTimesUseQuarterHoursOpeningHoursAndTheBookingClock() {
+        LocalDate day = LocalDate.now(clock);
+        for (LocalTime time : List.of(LocalTime.of(15, 0), LocalTime.of(15, 15), LocalTime.of(20, 0))) {
+            create(alice, day.atTime(time));
+        }
+        for (LocalTime time : List.of(LocalTime.of(14, 45), LocalTime.of(20, 15), LocalTime.of(17, 5),
+                LocalTime.of(17, 15, 1), LocalTime.of(17, 15, 0, 1))) {
+            given().port(port).auth().oauth2(alice).contentType("application/json")
+                    .body(Map.of("restaurantId", restaurant.getId(), "customerName", "Guest", "customerEmail", "guest@example.com",
+                            "time", day.atTime(time).toString(), "guests", 2))
+                    .post("/bookings").then().statusCode(400).contentType("application/problem+json");
+        }
+        java.util.TimeZone previous = java.util.TimeZone.getDefault();
+        try {
+            java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("UTC"));
+            // 16:30 in Stockholm, although the server's wall clock says 14:30.
+            doReturn(Instant.parse("2099-06-01T14:30:00Z")).when(clock).instant();
+            given().port(port).auth().oauth2(alice).contentType("application/json")
+                    .body(Map.of("restaurantId", restaurant.getId(), "customerName", "Guest", "customerEmail", "guest@example.com",
+                            "time", day.atTime(16, 15).toString(), "guests", 2))
+                    .post("/bookings").then().statusCode(400);
+            create(alice, day.atTime(16, 45));
+        } finally {
+            java.util.TimeZone.setDefault(previous);
+        }
     }
 
     @Test

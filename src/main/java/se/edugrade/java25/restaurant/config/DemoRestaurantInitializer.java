@@ -15,7 +15,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 /** Seeds an empty database and migrates known legacy names without recreating admin-renamed demos. */
 @Component
-@Profile("mysql & !test")
+@Profile("(mysql | prod) & !test")
 @ConditionalOnProperty(name = "app.demo-data.enabled", havingValue = "true")
 @RequiredArgsConstructor
 public class DemoRestaurantInitializer implements ApplicationRunner {

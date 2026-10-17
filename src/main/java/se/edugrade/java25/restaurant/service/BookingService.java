@@ -71,7 +71,7 @@ public class BookingService {
         booking.confirm();
         booking.markHandledByStaff();
 
-        BookingResponse confirmed = BookingResponse.from(bookingRepository.save(booking));
+        BookingResponse confirmed = BookingResponse.from(bookingRepository.saveAndFlush(booking));
 
         notificationService.sendBookingConfirmation(confirmed);
 
@@ -85,7 +85,7 @@ public class BookingService {
         booking.seat();
         booking.markHandledByStaff();
 
-        BookingResponse seated = BookingResponse.from(bookingRepository.save(booking));
+        BookingResponse seated = BookingResponse.from(bookingRepository.saveAndFlush(booking));
         log.info(BOOKING_STATUS_CHANGED, seated.id(), seated.status());
         return seated;
     }
@@ -103,7 +103,7 @@ public class BookingService {
             booking.cancelByGuest();
         }
 
-        BookingResponse canceled = BookingResponse.from(bookingRepository.save(booking));
+        BookingResponse canceled = BookingResponse.from(bookingRepository.saveAndFlush(booking));
         log.info(BOOKING_STATUS_CHANGED, canceled.id(), canceled.status());
         return canceled;
     }

@@ -103,7 +103,7 @@ class BookingIntegrationTests {
 
         long id = given().port(port).auth().oauth2(accessToken).contentType("application/json")
                 .body(Map.of("restaurantId", restaurantId, "customerName", "Guest",
-                        "customerEmail", "guest@example.com", "time", LocalDateTime.now().plusDays(1).toString(), "guests", 2))
+                        "customerEmail", "guest@example.com", "time", LocalDateTime.now().plusDays(1).withHour(17).withMinute(0).withSecond(0).withNano(0).toString(), "guests", 2))
                 .post("/bookings").then().statusCode(201).header("Location", containsString("/bookings/"))
                 .body("reference", matchesPattern("TD-[A-HJ-NP-Z2-9]{8}-[A-HJ-NP-Z2-9]{8}"),
                         "status", equalTo("REQUESTED"), "_links.confirm.href", notNullValue(),
@@ -198,6 +198,6 @@ class BookingIntegrationTests {
 
     private Map<String, Object> bookingRequest(long restaurantId, int guests) {
         return Map.of("restaurantId", restaurantId, "customerName", "Guest",
-                "customerEmail", "guest@example.com", "time", LocalDateTime.now().plusDays(1).toString(), "guests", guests);
+                "customerEmail", "guest@example.com", "time", LocalDateTime.now().plusDays(1).withHour(17).withMinute(0).withSecond(0).withNano(0).toString(), "guests", guests);
     }
 }
