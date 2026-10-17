@@ -1,0 +1,22 @@
+FROM node:22-alpine AS build
+WORKDIR /build
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY index.html ./
+COPY frontend ./frontend
+COPY public ./public
+COPY src/main/resources/demo ./src/main/resources/demo
+
+ARG VITE_API_URL
+ARG VITE_AUTH0_DOMAIN
+ARG VITE_AUTH0_CLIENT_ID
+ARG VITE_AUTH0_AUDIENCE
+ARG VITE_AUTH0_ROLES_CLAIM
+RUN test -n "$VITE_API_URL" && test -n "$VITE_AUTH0_DOMAIN" \
+    && test -n "$VITE_AUTH0_CLIENT_ID" && test -n "$VITE_AUTH0_AUDIENCE" \
+    && npm run build
+
+FROM caddy:2-alpine
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /build/dist /srv
+EXPOSE 8080
