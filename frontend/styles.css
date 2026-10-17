@@ -44,3 +44,4 @@ dialog::backdrop{background:#000b}
 .catalogue-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}.catalogue-toolbar .results-count{margin:0}.catalogue-toolbar .pagination{margin:0 0 0 auto}@media(max-width:500px){.catalogue-toolbar .pagination{gap:12px}}
 
 .booking-toolbar-actions{display:flex;flex-direction:column;align-items:flex-end;gap:12px}.booking-toolbar-actions .results-count,.booking-toolbar-actions .pagination{margin:0}@media(max-width:700px){.booking-toolbar-actions{align-items:flex-start}}
+.account-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.account-summary .muted{margin:0;overflow-wrap:anywhere;flex:1;min-width:0}.account-summary .button{flex-shrink:0}
