@@ -1,0 +1,213 @@
+[
+  {
+    "name": "Maple & Mini",
+    "city": "Stockholm",
+    "cuisine": "Pancakes & brunch",
+    "seats": 36,
+    "description": "A cosy brunch spot for little pancake fans and their grown-ups.",
+    "dish": {
+      "name": "Berry Pancakes",
+      "type": "pancakes",
+      "category": "Sweet treats",
+      "text": "Golden pancakes with berries and a spoonful of jam.",
+      "price": 65,
+      "allergens": "Contains milk, eggs and gluten."
+    },
+    "demoKey": "maple-mini"
+  },
+  {
+    "name": "Mamma Mia's Meatballs",
+    "legacyNames": [
+      "Little Fork Kitchen"
+    ],
+    "city": "Stockholm",
+    "cuisine": "Swedish comfort food",
+    "seats": 48,
+    "description": "Familiar Swedish favourites with mild flavours for small appetites.",
+    "dish": {
+      "name": "Meatballs & Macaroni",
+      "type": "meatballs",
+      "category": "Classics",
+      "text": "Meatballs and macaroni with lingonberry jam on the side.",
+      "price": 79,
+      "allergens": "Contains milk and gluten. Meatballs may contain eggs."
+    },
+    "demoKey": "mamma-meatballs"
+  },
+  {
+    "name": "Peas & Please",
+    "city": "Uppsala",
+    "cuisine": "Fish, chips & peas",
+    "seats": 30,
+    "description": "Golden fish, crispy chips and plenty of sweet green peas for little diners.",
+    "dish": {
+      "name": "Fish & Chips with Peas",
+      "type": "fish",
+      "category": "Classics",
+      "text": "A little golden fish fillet with crispy chips, sweet green peas and a mild dip.",
+      "price": 85,
+      "allergens": "Contains fish and gluten. Dip contains eggs and milk."
+    },
+    "demoKey": "peas-please"
+  },
+  {
+    "name": "Pocket Pizza Palace",
+    "legacyNames": [
+      "Pocket Pizza Club"
+    ],
+    "city": "Gothenburg",
+    "cuisine": "Pizza & Italian",
+    "seats": 44,
+    "description": "Little pizzas, simple toppings and a relaxed place to eat together.",
+    "dish": {
+      "name": "Mini Margherita",
+      "type": "pizza",
+      "category": "Veggie",
+      "text": "A little pizza with tomato sauce and melted mozzarella.",
+      "price": 75,
+      "allergens": "Contains milk and gluten."
+    },
+    "demoKey": "pocket-pizza"
+  },
+  {
+    "name": "Puddington",
+    "legacyNames": [
+      "Golden Cub Diner",
+      "Pudding & Lingon"
+    ],
+    "city": "Uppsala",
+    "cuisine": "Swedish comfort food",
+    "seats": 40,
+    "description": "A cosy Swedish kitchen where little portions of black pudding meet sweet lingonberry jam.",
+    "dish": {
+      "name": "Black Pudding & Lingonberries",
+      "type": "black-pudding",
+      "category": "Classics",
+      "text": "Pan-fried Swedish blood pudding with lingonberry jam and grated apple on the side.",
+      "price": 75,
+      "allergens": "Contains gluten. May contain milk."
+    },
+    "demoKey": "puddington"
+  },
+  {
+    "name": "Little Burger Barn",
+    "legacyNames": [
+      "Little Harbour"
+    ],
+    "city": "Gothenburg",
+    "cuisine": "Burgers & family favourites",
+    "seats": 38,
+    "description": "A relaxed family burger spot serving little burgers with big flavour.",
+    "dish": {
+      "name": "Mini Cheeseburger",
+      "type": "burger",
+      "category": "Classics",
+      "text": "A little beef burger with melted cheese, lettuce and tomato in a soft bun, served with crispy fries.",
+      "price": 85,
+      "allergens": "Contains milk, gluten, eggs and sesame."
+    },
+    "demoKey": "burger-barn"
+  },
+  {
+    "name": "Noodle Nest",
+    "city": "Stockholm",
+    "cuisine": "Pasta & little favourites",
+    "seats": 32,
+    "description": "A cosy pasta kitchen with familiar flavours and little portions for growing appetites.",
+    "dish": {
+      "name": "Tiny Tomato Pasta",
+      "type": "pasta",
+      "category": "Veggie",
+      "text": "Soft pasta in a mild tomato sauce with grated cheese.",
+      "price": 72,
+      "allergens": "Contains gluten and milk."
+    },
+    "demoKey": "noodle-nest",
+    "seedVersion": 2
+  },
+  {
+    "name": "The Happy Hen",
+    "city": "Uppsala",
+    "cuisine": "Chicken & crispy favourites",
+    "seats": 42,
+    "description": "A relaxed family spot for crispy chicken bites and easy-going dinners.",
+    "dish": {
+      "name": "Golden Chicken Bites",
+      "type": "chicken",
+      "category": "Classics",
+      "text": "Crispy chicken bites with little fries, carrot sticks and a mild dip.",
+      "price": 82,
+      "allergens": "Contains gluten, eggs and milk."
+    },
+    "demoKey": "happy-hen",
+    "seedVersion": 2
+  },
+  {
+    "name": "Little Green Spoon",
+    "city": "Gothenburg",
+    "cuisine": "Veggie & family food",
+    "seats": 34,
+    "description": "A friendly green kitchen making vegetables a familiar part of the family table.",
+    "dish": {
+      "name": "Creamy Pea Pasta",
+      "type": "peas",
+      "category": "Veggie",
+      "text": "Small pasta shapes with creamy pea sauce and a sprinkle of cheese.",
+      "price": 74,
+      "allergens": "Contains gluten and milk."
+    },
+    "demoKey": "green-spoon",
+    "seedVersion": 2
+  },
+  {
+    "name": "Sunny Side Minis",
+    "city": "Stockholm",
+    "cuisine": "Pancakes & sweet treats",
+    "seats": 28,
+    "description": "A sunny little brunch cafe with warm pancakes for the whole family.",
+    "dish": {
+      "name": "Mini Berry Stack",
+      "type": "pancakes",
+      "category": "Sweet treats",
+      "text": "A little pancake stack with berries, butter and a drizzle of syrup.",
+      "price": 69,
+      "allergens": "Contains gluten, eggs and milk."
+    },
+    "demoKey": "sunny-minis",
+    "seedVersion": 2
+  },
+  {
+    "name": "Little Slice House",
+    "city": "Uppsala",
+    "cuisine": "Pizza & family favourites",
+    "seats": 46,
+    "description": "A welcoming pizza place where small hands get their own little slice.",
+    "dish": {
+      "name": "Little Cheese Pizza",
+      "type": "pizza",
+      "category": "Veggie",
+      "text": "A mini pizza with mild tomato sauce and plenty of melted cheese.",
+      "price": 78,
+      "allergens": "Contains gluten and milk."
+    },
+    "demoKey": "slice-house",
+    "seedVersion": 2
+  },
+  {
+    "name": "Tiny Bun Club",
+    "city": "Gothenburg",
+    "cuisine": "Burgers & little bites",
+    "seats": 40,
+    "description": "A cheerful burger kitchen with soft buns, small portions and room for the family.",
+    "dish": {
+      "name": "Little Classic Burger",
+      "type": "burger",
+      "category": "Classics",
+      "text": "A small beef burger with cheese, lettuce and tomato, served with fries.",
+      "price": 84,
+      "allergens": "Contains gluten, milk, eggs and sesame."
+    },
+    "demoKey": "bun-club",
+    "seedVersion": 2
+  }
+]

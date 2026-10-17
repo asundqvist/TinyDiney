@@ -1,0 +1,20 @@
+{
+  "name": "tinydiny",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test frontend/*.test.js",
+    "dev": "vite --host localhost --port 5173 --strictPort",
+    "build": "vite build",
+    "preview": "vite preview --host localhost --port 5173 --strictPort"
+  },
+  "dependencies": {
+    "@auth0/auth0-react": "^2.28.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "vite": "^7.1.0"
+  }
+}

@@ -1,0 +1,13 @@
+# Activate with --spring.profiles.active=mysql or IntelliJ's Active profiles field.
+spring:
+  config:
+    import: "optional:file:.env[.properties]"
+  datasource:
+    url: jdbc:mysql://127.0.0.1:${MYSQL_PORT:3306}/restaurant?sslMode=DISABLED&allowPublicKeyRetrieval=true&connectionTimeZone=LOCAL
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+app:
+  demo-data:
+    enabled: ${DEMO_DATA_ENABLED:true}

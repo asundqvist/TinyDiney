@@ -19,7 +19,7 @@ import se.edugrade.java25.restaurant.dto.BookingResponse;
 
 public interface BookingApi {
 
-        @Operation(summary = "List bookings", description = "Retrieves a paginated list of bookings using offset-based pagination.")
+        @Operation(summary = "List bookings", description = "Retrieves a paginated list of bookings. Guests only see bookings owned by their JWT subject; staff and admins see all bookings.")
         @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully")
         @ApiResponse(responseCode = "400", description = "Invalid pagination parameters",
                 content = @Content(
@@ -29,7 +29,7 @@ public interface BookingApi {
         BookingPageResponse findAll(
                 @ParameterObject Pageable pageable);
 
-        @Operation(summary = "Get booking by ID", description = "Retrieves a booking by its unique identifier. Supports conditional requests using ETag and If-None-Match.")
+        @Operation(summary = "Get booking by ID", description = "Retrieves a booking by its unique identifier. Guests can only read their own bookings. Supports conditional requests using ETag and If-None-Match.")
         @ApiResponse(responseCode = "200", description = "Booking retrieved successfully", headers = @Header(
                         name = "ETag",
                         description = "Version identifier for the booking"))
@@ -131,7 +131,7 @@ public interface BookingApi {
 
         @Operation(
                 summary = "Cancel a booking",
-                description = "Changes the booking status from REQUESTED or CONFIRMED to CANCELLED."
+                description = "Changes REQUESTED or CONFIRMED to CANCELLED. Guests may only cancel their own bookings until one hour before the booking time. Staff and admins are not restricted by the guest deadline."
         )
         @ApiResponse(
                 responseCode = "200",
@@ -147,7 +147,7 @@ public interface BookingApi {
         )
         @ApiResponse(
                 responseCode = "409",
-                description = "Booking cannot be cancelled in its current state",
+                description = "Booking cannot be cancelled in its current state or the guest cancellation deadline has passed",
                 content = @Content(
                         mediaType = "application/problem+json",
                         schema = @Schema(implementation = ProblemDetail.class)

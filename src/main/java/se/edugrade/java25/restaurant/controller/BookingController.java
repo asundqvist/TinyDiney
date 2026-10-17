@@ -18,6 +18,8 @@ import se.edugrade.java25.restaurant.dto.BookingRequest;
 import se.edugrade.java25.restaurant.dto.BookingPageResponse;
 import se.edugrade.java25.restaurant.dto.BookingResponse;
 import se.edugrade.java25.restaurant.dto.BookingResult;
+import se.edugrade.java25.restaurant.dto.MyBookingPageResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import se.edugrade.java25.restaurant.model.Booking;
 import se.edugrade.java25.restaurant.service.BookingService;
 
@@ -33,6 +35,12 @@ public class BookingController implements BookingApi {
     @GetMapping
     public BookingPageResponse findAll(Pageable pageable) {
         return bookingService.findAll(pageable);
+    }
+
+    @GetMapping("/mine")
+    @Operation(summary = "List my bookings", description = "Lists only bookings owned by the authenticated JWT subject, with the guest cancellation deadline and eligibility.")
+    public MyBookingPageResponse findMine(Pageable pageable) {
+        return bookingService.findMine(pageable);
     }
 
     @GetMapping("/{id}")
@@ -91,4 +99,3 @@ public class BookingController implements BookingApi {
         return model;
     }
     }
-

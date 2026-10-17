@@ -970,3 +970,8 @@ EdugradeBrandManualv2.0.pdf
 **/clean/
 
 *.iml
+
+# Frontend builds and local configuration
+dist/
+.env.local
+.env.*.local

@@ -7,7 +7,8 @@ public record RestaurantResponse(
         String name,
         String city,
         String cuisine,
-        int seats
+        int seats,
+        String demoKey
 ) {
     public static RestaurantResponse from(Restaurant restaurant) {
         return new RestaurantResponse(
@@ -15,6 +16,7 @@ public record RestaurantResponse(
                 restaurant.getName(),
                 restaurant.getCity(),
                 restaurant.getCuisine(),
-                restaurant.getSeats());
+                restaurant.getSeats(),
+                restaurant.getDemoKey());
     }
 }

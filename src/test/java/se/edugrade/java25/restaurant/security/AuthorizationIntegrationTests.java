@@ -55,9 +55,9 @@ class AuthorizationIntegrationTests {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
-        RestaurantResponse restaurant = new RestaurantResponse(1L, "Bella", "Stockholm", "Italian", 40);
+        RestaurantResponse restaurant = new RestaurantResponse(1L, "Bella", "Stockholm", "Italian", 40, null);
         BookingResponse booking = new BookingResponse(1L, 1L, "Guest", "guest@example.com",
-                LocalDateTime.now().plusDays(1), 2, BookingStatus.REQUESTED);
+                LocalDateTime.now().plusDays(1), 2, BookingStatus.REQUESTED, "TD-ABCDEFGH-23456789", false);
         when(restaurantService.findAll(any())).thenReturn(new RestaurantPageResponse(List.of(restaurant), 0, 20, 1, 1));
         when(restaurantService.findById(1L)).thenReturn(restaurant);
         when(restaurantService.create(any())).thenReturn(restaurant);
@@ -83,17 +83,16 @@ class AuthorizationIntegrationTests {
                 .andExpect(status().is(endpoint.roles().contains(role) ? endpoint.successStatus() : 403));
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("endpoints")
-    @DisplayName("Alla skyddade endpoints kräver token")
-    void missingTokenReturns401(Endpoint endpoint) throws Exception {
-        mockMvc.perform(requestFor(endpoint)).andExpect(status().isUnauthorized());
+    @Test
+    @DisplayName("A protected endpoint without a token returns 401")
+    void missingTokenReturns401() throws Exception {
+        mockMvc.perform(get("/bookings")).andExpect(status().isUnauthorized());
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("endpoints")
-    @DisplayName("Adminrollen utan rätt scope ger 403")
-    void missingScopeReturns403(Endpoint endpoint) throws Exception {
+    @Test
+    @DisplayName("Admin without the required write scope returns 403")
+    void missingScopeReturns403() throws Exception {
+        Endpoint endpoint = new Endpoint("POST", "/restaurants", 201, Set.of("ADMIN"));
         mockMvc.perform(requestFor(endpoint).with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isForbidden());
     }

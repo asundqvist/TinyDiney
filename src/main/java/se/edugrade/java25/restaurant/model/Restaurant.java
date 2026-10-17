@@ -13,6 +13,14 @@ public class Restaurant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Stable identity for demo data, retained when an admin edits its public fields.
+    @Column(unique = true, length = 64)
+    private String demoKey;
+
+    public void identifyDemo(String key) {
+        if (demoKey == null) demoKey = key;
+    }
+
     @Column(nullable = false)
     private String name;
 

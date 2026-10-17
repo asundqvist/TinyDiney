@@ -12,7 +12,9 @@ public record BookingResponse(
         String customerEmail,
         LocalDateTime time,
         int guests,
-        BookingStatus status
+        BookingStatus status,
+        String reference,
+        boolean guestCancelledAfterConfirmation
 ) {
     public static BookingResponse from(Booking booking) {
         return new BookingResponse(
@@ -22,6 +24,8 @@ public record BookingResponse(
                 booking.getGuestEmail(),
                 booking.getBookingTime(),
                 booking.getGuestSize(),
-                booking.getBookingStatus());
+                booking.getBookingStatus(),
+                booking.getReference(),
+                booking.wasGuestCancelledAfterConfirmation());
     }
 }

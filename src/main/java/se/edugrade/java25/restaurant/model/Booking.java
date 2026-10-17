@@ -5,7 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import se.edugrade.java25.restaurant.exceptions.InvalidBookingStateException;
 
+import java.security.SecureRandom;
+import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "bookings")
@@ -17,6 +21,13 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private static final SecureRandom REFERENCE_RANDOM = new SecureRandom();
+    private static final String REFERENCE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    // Nullable only to allow Hibernate to add the column to existing databases before backfill.
+    @Column(name = "booking_reference", length = 20, unique = true)
+    private String reference;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
@@ -27,6 +38,10 @@ public class Booking {
     @Column(nullable = false)
     private String guestEmail;
 
+    // Nullable for bookings created before account ownership was introduced.
+    @Column(name = "owner_subject", length = 255)
+    private String ownerSubject;
+
     @Column(nullable = false)
     private LocalDateTime bookingTime;
 
@@ -35,6 +50,22 @@ public class Booking {
 
     @Column(nullable = false)
     private int revision;
+
+    // Separate from the normal revision so guests' own cancellations do not create staff notifications.
+    private Integer staffUpdateRevision;
+
+    // Nullable for older bookings; only new guest cancellations of confirmed tables set this flag.
+    private Boolean guestCancelledAfterConfirmation;
+
+    public boolean wasGuestCancelledAfterConfirmation() {
+        return Boolean.TRUE.equals(guestCancelledAfterConfirmation);
+    }
+
+    public void cancelByGuest() {
+        boolean wasConfirmed = bookingStatus == BookingStatus.CONFIRMED;
+        cancel();
+        guestCancelledAfterConfirmation = wasConfirmed;
+    }
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -46,7 +77,39 @@ public class Booking {
         this.guestEmail = guestEmail;
         this.bookingTime = bookingTime;
         this.guestSize = guestSize;
+        ensureReference();
         this.revision = 1;
+    }
+
+    public Booking(Restaurant restaurant, String guestName, String guestEmail, LocalDateTime bookingTime,
+                   int guestSize, String ownerSubject) {
+        this(restaurant, guestName, guestEmail, bookingTime, guestSize);
+        this.ownerSubject = ownerSubject;
+    }
+
+    @PrePersist
+    public void ensureReference() {
+        if (reference != null) return;
+        var value = new StringBuilder("TD-");
+        for (int index = 0; index < 16; index++) {
+            if (index == 8) value.append('-');
+            value.append(REFERENCE_ALPHABET.charAt(REFERENCE_RANDOM.nextInt(REFERENCE_ALPHABET.length())));
+        }
+        reference = value.toString();
+        // Adding a reference to an old booking also changes its HTTP representation.
+        revision++;
+    }
+
+    public OffsetDateTime guestCancellationDeadline(ZoneId zone) {
+        return bookingTime.atZone(zone).minusHours(1).toOffsetDateTime();
+    }
+
+    public boolean canGuestCancel(Clock clock) {
+        return canCancel() && !clock.instant().isAfter(guestCancellationDeadline(clock.getZone()).toInstant());
+    }
+
+    public void markHandledByStaff() {
+        staffUpdateRevision = revision;
     }
 
     public boolean canConfirm() {
@@ -87,4 +150,3 @@ public class Booking {
         }
     }
 }
-
