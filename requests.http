@@ -1,98 +1,520 @@
-### Inlämningsuppgift: anrop mot ditt API
-###
-### Starta appen först:  mvn spring-boot:run
-### IntelliJ: klicka på den gröna pilen till vänster om varje anrop.
-### VS Code: installera tillägget REST Client.
-###
-### Fyll på filen allt eftersom du bygger. Den är din snabbaste väg att se
-### vad API:et faktiskt svarar, och den blir din demo på redovisningen.
-
-@host = http://localhost:8080
-
-### Byt till din driftsatta tjänst inför redovisningen genom att
-### kommentera bort raden ovan och ta fram den här i stället.
-# @host = https://ditt-projekt.onrender.com
+﻿# TinyDiney API demonstration — IntelliJ HTTP Client
+# Select local or railway from http-client.env.json.
+# Put guestToken, staffToken and adminToken in http-client.private.env.json
+# under the matching environment. Use three different user accounts.
+# Tokens must be fresh API access tokens with the scopes in AUTH0_SETUP.md.
+#
+# Run numbered requests IN ORDER. Response handlers retain generated IDs/ETag.
+# This creates one demo restaurant and three bookings; it deletes no records.
+# Default to local. Railway mutation requests also persist data.
+# See README_TinyDiney.md for setup. Scripts target IntelliJ's HTTP Client.
 
 
-### 1. Lever tjänsten? Svarar 200 och {"status":"UP","service":"restaurant-api"}.
-### Det här är det enda anropet som fungerar i det utdelade projektet.
+### 01. Public health — 200
 GET {{host}}/health
 Accept: application/json
 
 > {%
-    client.test("tjansten svarar", function () {
-        client.assert(response.status === 200, "forvantade 200, fick " + response.status);
-        client.assert(response.body.status === "UP", "status var inte UP");
-    });
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Application responds", function () { client.assert(response.body.status === "UP"); });
 %}
 
+### 02. Public OpenAPI — 200
+GET {{host}}/v3/api-docs
+Accept: application/json
 
-### ---------------------------------------------------------------------
-### Del 1: REST-API
-### Ta bort kommentarstecknen när du byggt respektive endpoint.
-### ---------------------------------------------------------------------
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("API documentation exists", function () { client.assert(response.body.info.title === "TinyDiney API"); });
+%}
 
-### 2. Lista restauranger. Paginerat.
-# GET {{host}}/restaurants?page=0&size=10
-# Accept: application/json
+### 03. Public Swagger UI — 200
+GET {{host}}/swagger-ui/index.html
+Accept: text/html
 
-### 3. Skapa en bokning. Ska ge 201 och en Location-header.
-### Titta på svarets headers, inte bara på body.
-# POST {{host}}/bookings
-# Content-Type: application/json
-#
-# {
-#   "restaurantId": 1,
-#   "guestName": "Alice Andersson",
-#   "guestEmail": "alice@example.com",
-#   "dateTime": "2026-10-20T19:00:00",
-#   "partySize": 4
-# }
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+%}
 
-### 4. Hämta bokningen. Leta efter länkarna i svaret: en bokning i
-### REQUESTED ska erbjuda både bekräfta och avboka.
-# GET {{host}}/bookings/1
-# Accept: application/json
+### 04. Protected endpoint without token — 401
+GET {{host}}/bookings
+Accept: application/json
 
-### 5. En bokning som inte finns. Ska ge 404 som application/problem+json.
-### Får du tom body har du glömt spring.mvc.problemdetails.enabled.
-# GET {{host}}/bookings/999999
-# Accept: application/json
+> {%
+  client.test("HTTP 401", function () { client.assert(response.status === 401, "Expected 401, got " + response.status); });
+  client.test("Bearer challenge", function () { client.assert(response.headers.valueOf("WWW-Authenticate").startsWith("Bearer")); });
+%}
 
-### 6. Villkorad hämtning. Kopiera ETag-värdet från svaret på anrop 4
-### och klistra in det nedan. Ska ge 304 och tom body.
-# GET {{host}}/bookings/1
-# If-None-Match: "klistra-in-etag-har"
+### 05. Malformed token — 401
+GET {{host}}/bookings
+Authorization: Bearer not-a-jwt
+Accept: application/json
 
-### 7. En otillåten tillståndsövergång. Avboka först, försök sedan
-### bekräfta samma bokning. Ska ge 409.
-# POST {{host}}/bookings/1/cancel
-###
-# POST {{host}}/bookings/1/confirm
+> {%
+  client.test("HTTP 401", function () { client.assert(response.status === 401, "Expected 401, got " + response.status); });
+%}
 
+### 06. Guest cannot create a restaurant — 403
+POST {{host}}/restaurants
+Authorization: Bearer {{guestToken}}
+Content-Type: application/json
+Accept: application/json
 
-### ---------------------------------------------------------------------
-### Del 3: Säkerhet
-### ---------------------------------------------------------------------
+{
+  "name": "Forbidden demo",
+  "city": "Stockholm",
+  "cuisine": "Family favourites",
+  "seats": 30
+}
 
-### 8. Utan token. Ska ge 401, inte 403.
-# GET {{host}}/bookings
-# Accept: application/json
+> {%
+  client.test("HTTP 403", function () { client.assert(response.status === 403, "Expected 403, got " + response.status); });
+%}
 
-### 9. Med token. Hämta en riktig token från din authorization server och
-### klistra in den. Ska ge 200.
-# GET {{host}}/bookings
-# Accept: application/json
-# Authorization: Bearer klistra-in-token-har
+### 07. Admin creates a demonstration restaurant — 201 + Location
+POST {{host}}/restaurants
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+Accept: application/json
 
-### 10. Rätt inloggad, fel behörighet. En gäst som försöker bekräfta
-### en bokning ska få 403, inte 401.
-# POST {{host}}/bookings/1/confirm
-# Authorization: Bearer klistra-in-gast-token-har
+{
+  "name": "TinyDiney API Demo Cafe",
+  "city": "Stockholm",
+  "cuisine": "Pancakes and family favourites",
+  "seats": 32
+}
 
-### 11. CORS-preflight från din frontend. Svaret ska innehålla
-### Access-Control-Allow-Origin. Gör det inte det är CORS fel konfigurerat.
-# OPTIONS {{host}}/bookings
-# Origin: http://localhost:5173
-# Access-Control-Request-Method: POST
-# Access-Control-Request-Headers: content-type,authorization
+> {%
+  client.test("HTTP 201", function () { client.assert(response.status === 201, "Expected 201, got " + response.status); });
+  client.test("Created restaurant and Location", function () {
+    client.assert(response.body.id > 0);
+    client.assert(response.headers.valueOf("Location").endsWith("/restaurants/" + response.body.id));
+  });
+  if (response.status === 201) client.global.set("demoRestaurantId", response.body.id);
+%}
+
+### 08. Admin updates the restaurant — 200
+PUT {{host}}/restaurants/{{demoRestaurantId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "TinyDiney API Demo Cafe",
+  "city": "Stockholm",
+  "cuisine": "Pancakes and family favourites",
+  "seats": 36
+}
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Updated capacity", function () { client.assert(response.body.seats === 36); });
+%}
+
+### 09. Guest reads restaurant details — 200
+GET {{host}}/restaurants/{{demoRestaurantId}}
+Authorization: Bearer {{guestToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+%}
+
+### 10. Restaurant pagination — first page
+GET {{host}}/restaurants?page=0&size=6&sort=id,asc
+Authorization: Bearer {{guestToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("First page metadata", function () {
+    client.assert(response.body.page === 0 && response.body.size === 6);
+    client.assert(response.body.content.length <= 6);
+    client.assert(response.body.totalElements >= 1);
+  });
+%}
+
+### 11. Restaurant pagination — second page (may be empty without demos)
+GET {{host}}/restaurants?page=1&size=6&sort=id,asc
+Authorization: Bearer {{guestToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Second page metadata", function () { client.assert(response.body.page === 1 && response.body.content.length <= 6); });
+%}
+
+### 12. Guest requests booking A — 201 + Location, reference and transition links
+< {%
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const day = tomorrow.getFullYear() + "-" + String(tomorrow.getMonth() + 1).padStart(2, "0") + "-" + String(tomorrow.getDate()).padStart(2, "0");
+  request.variables.set("reservationTime", day + "T17:00:00");
+%}
+POST {{host}}/bookings
+Authorization: Bearer {{guestToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "restaurantId": {{demoRestaurantId}},
+  "customerName": "Demo Family A",
+  "customerEmail": "demo.guest@example.com",
+  "time": "{{reservationTime}}",
+  "guests": 4
+}
+
+> {%
+  client.test("HTTP 201", function () { client.assert(response.status === 201, "Expected 201, got " + response.status); });
+  client.test("Created booking and legal links", function () {
+    client.assert(response.headers.valueOf("Location").endsWith("/bookings/" + response.body.id));
+    client.assert(response.body.status === "REQUESTED");
+    client.assert(/^TD-[A-HJ-NP-Z2-9]{8}-[A-HJ-NP-Z2-9]{8}$/.test(response.body.reference));
+    client.assert(!!response.body._links.confirm && !!response.body._links.cancel);
+    client.assert(!response.body._links.seat);
+  });
+  if (response.status === 201) client.global.set("bookingAId", response.body.id);
+%}
+
+### 13. Guest reads booking A — retain the ETag
+GET {{host}}/bookings/{{bookingAId}}
+Authorization: Bearer {{guestToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Booking has ETag", function () { client.assert(!!response.headers.valueOf("ETag")); });
+  if (response.status === 200) client.global.set("requestedETag", response.headers.valueOf("ETag"));
+%}
+
+### 14. Unchanged booking — 304
+GET {{host}}/bookings/{{bookingAId}}
+Authorization: Bearer {{guestToken}}
+If-None-Match: {{requestedETag}}
+
+> {%
+  client.test("HTTP 304", function () { client.assert(response.status === 304, "Expected 304, got " + response.status); });
+  client.test("No response body", function () { client.assert(!response.body); });
+%}
+
+### 15. Guest booking list — owner-filtered and paginated
+GET {{host}}/bookings?page=0&size=5&sort=id,desc
+Authorization: Bearer {{guestToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Five per API page", function () { client.assert(response.body.size === 5 && response.body.content.length <= 5); });
+%}
+
+### 16. Personal bookings include cancellation information
+GET {{host}}/bookings/mine?page=0&size=5&sort=id,desc
+Authorization: Bearer {{guestToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("New booking belongs to guest", function () {
+    const booking = response.body.content.find(function (item) { return String(item.id) === String(client.global.get("bookingAId")); });
+    client.assert(!!booking && booking.cancellable === true && !!booking.cancellationDeadline);
+  });
+%}
+
+### 17. Guest cannot confirm — 403
+POST {{host}}/bookings/{{bookingAId}}/confirm
+Authorization: Bearer {{guestToken}}
+
+> {%
+  client.test("HTTP 403", function () { client.assert(response.status === 403, "Expected 403, got " + response.status); });
+%}
+
+### 18. Guest cannot seat — 403
+POST {{host}}/bookings/{{bookingAId}}/seat
+Authorization: Bearer {{guestToken}}
+
+> {%
+  client.test("HTTP 403", function () { client.assert(response.status === 403, "Expected 403, got " + response.status); });
+%}
+
+### 19. Staff confirms A — 200; simulated confirmation notification
+POST {{host}}/bookings/{{bookingAId}}/confirm
+Authorization: Bearer {{staffToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Confirmed links", function () {
+    client.assert(response.body.status === "CONFIRMED");
+    client.assert(!!response.body._links.seat && !!response.body._links.cancel && !response.body._links.confirm);
+  });
+%}
+
+### 20. Old ETag after status change — 200 and a different ETag
+GET {{host}}/bookings/{{bookingAId}}
+Authorization: Bearer {{guestToken}}
+If-None-Match: {{requestedETag}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Representation changed", function () {
+    client.assert(response.body.status === "CONFIRMED");
+    client.assert(response.headers.valueOf("ETag") !== client.global.get("requestedETag"));
+  });
+%}
+
+### 21. Confirming A again is illegal — 409 ProblemDetail
+POST {{host}}/bookings/{{bookingAId}}/confirm
+Authorization: Bearer {{staffToken}}
+
+> {%
+  client.test("HTTP 409", function () { client.assert(response.status === 409, "Expected 409, got " + response.status); });
+  client.test("Conflict detail", function () { client.assert(response.body.status === 409 && !!response.body.detail); });
+%}
+
+### 22. Staff seats A — 200
+POST {{host}}/bookings/{{bookingAId}}/seat
+Authorization: Bearer {{staffToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Seated has no transitions", function () {
+    client.assert(response.body.status === "SEATED");
+    client.assert(!response.body._links.confirm && !response.body._links.seat && !response.body._links.cancel);
+  });
+%}
+
+### 23. Seated booking cannot be cancelled — 409
+POST {{host}}/bookings/{{bookingAId}}/cancel
+Authorization: Bearer {{staffToken}}
+
+> {%
+  client.test("HTTP 409", function () { client.assert(response.status === 409, "Expected 409, got " + response.status); });
+%}
+
+### 24. Guest requests B for confirmed guest cancellation — 201
+< {%
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const day = tomorrow.getFullYear() + "-" + String(tomorrow.getMonth() + 1).padStart(2, "0") + "-" + String(tomorrow.getDate()).padStart(2, "0");
+  request.variables.set("reservationTime", day + "T17:00:00");
+%}
+POST {{host}}/bookings
+Authorization: Bearer {{guestToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "restaurantId": {{demoRestaurantId}},
+  "customerName": "Demo Family B",
+  "customerEmail": "demo.guest@example.com",
+  "time": "{{reservationTime}}",
+  "guests": 4
+}
+
+> {%
+  client.test("HTTP 201", function () { client.assert(response.status === 201, "Expected 201, got " + response.status); });
+  if (response.status === 201) client.global.set("bookingBId", response.body.id);
+%}
+
+### 25. Staff confirms B
+POST {{host}}/bookings/{{bookingBId}}/confirm
+Authorization: Bearer {{staffToken}}
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+%}
+
+### 26. Guest cancels B before its deadline
+POST {{host}}/bookings/{{bookingBId}}/cancel
+Authorization: Bearer {{guestToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Guest cancellation after confirmation", function () {
+    client.assert(response.body.status === "CANCELLED" && response.body.guestCancelledAfterConfirmation === true);
+    client.assert(!response.body._links.confirm && !response.body._links.seat && !response.body._links.cancel);
+  });
+%}
+
+### 27. Cancelled B cannot be confirmed — 409
+POST {{host}}/bookings/{{bookingBId}}/confirm
+Authorization: Bearer {{staffToken}}
+
+> {%
+  client.test("HTTP 409", function () { client.assert(response.status === 409, "Expected 409, got " + response.status); });
+%}
+
+### 28. Guest requests C for staff decline — 201
+< {%
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const day = tomorrow.getFullYear() + "-" + String(tomorrow.getMonth() + 1).padStart(2, "0") + "-" + String(tomorrow.getDate()).padStart(2, "0");
+  request.variables.set("reservationTime", day + "T17:00:00");
+%}
+POST {{host}}/bookings
+Authorization: Bearer {{guestToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "restaurantId": {{demoRestaurantId}},
+  "customerName": "Demo Family C",
+  "customerEmail": "demo.guest@example.com",
+  "time": "{{reservationTime}}",
+  "guests": 4
+}
+
+> {%
+  client.test("HTTP 201", function () { client.assert(response.status === 201, "Expected 201, got " + response.status); });
+  if (response.status === 201) client.global.set("bookingCId", response.body.id);
+%}
+
+### 29. Staff declines pending C
+POST {{host}}/bookings/{{bookingCId}}/cancel
+Authorization: Bearer {{staffToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Declined request", function () {
+    client.assert(response.body.status === "CANCELLED");
+    client.assert(response.body.guestCancelledAfterConfirmation === false);
+  });
+%}
+
+### 30. Staff reads paginated bookings
+GET {{host}}/bookings?page=0&size=5&sort=id,desc
+Authorization: Bearer {{staffToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Page limit", function () { client.assert(response.body.size === 5 && response.body.content.length <= 5); });
+%}
+
+### 31. Staff second page — may be empty in a fresh database
+GET {{host}}/bookings?page=1&size=5&sort=id,desc
+Authorization: Bearer {{staffToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Second page", function () { client.assert(response.body.page === 1 && response.body.content.length <= 5); });
+%}
+
+### 32. Staff mine endpoint contains only their own bookings
+GET {{host}}/bookings/mine?page=0&size=5&sort=id,desc
+Authorization: Bearer {{staffToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Mine does not become the staff global list", function () {
+    client.assert(!response.body.content.some(function (item) { return String(item.id) === String(client.global.get("bookingAId")); }));
+  });
+%}
+
+### 33. Unknown booking — 404 ProblemDetail
+GET {{host}}/bookings/9223372036854775807
+Authorization: Bearer {{staffToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 404", function () { client.assert(response.status === 404, "Expected 404, got " + response.status); });
+  client.test("ProblemDetail", function () {
+    client.assert(response.body.status === 404 && !!response.body.detail);
+    client.assert(response.headers.valueOf("Content-Type").includes("application/problem+json"));
+  });
+%}
+
+### 34. Unknown restaurant — 404
+GET {{host}}/restaurants/9223372036854775807
+Authorization: Bearer {{guestToken}}
+Accept: application/json
+
+> {%
+  client.test("HTTP 404", function () { client.assert(response.status === 404, "Expected 404, got " + response.status); });
+%}
+
+### 35. Invalid guest count and email — 400 ProblemDetail
+< {%
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const day = tomorrow.getFullYear() + "-" + String(tomorrow.getMonth() + 1).padStart(2, "0") + "-" + String(tomorrow.getDate()).padStart(2, "0");
+  request.variables.set("reservationTime", day + "T17:00:00");
+%}
+POST {{host}}/bookings
+Authorization: Bearer {{guestToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "restaurantId": {{demoRestaurantId}},
+  "customerName": "Invalid demo",
+  "customerEmail": "not-an-email",
+  "time": "{{reservationTime}}",
+  "guests": 0
+}
+
+> {%
+  client.test("HTTP 400", function () { client.assert(response.status === 400, "Expected 400, got " + response.status); });
+  client.test("Field validation detail", function () { client.assert(response.body.status === 400 && response.body.errors.length > 0); });
+%}
+
+### 36. Time outside a quarter-hour slot — 400
+< {%
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const day = tomorrow.getFullYear() + "-" + String(tomorrow.getMonth() + 1).padStart(2, "0") + "-" + String(tomorrow.getDate()).padStart(2, "0");
+  request.variables.set("reservationTime", day + "T17:07:00");
+%}
+POST {{host}}/bookings
+Authorization: Bearer {{guestToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "restaurantId": {{demoRestaurantId}},
+  "customerName": "Invalid slot",
+  "customerEmail": "demo.guest@example.com",
+  "time": "{{reservationTime}}",
+  "guests": 4
+}
+
+> {%
+  client.test("HTTP 400", function () { client.assert(response.status === 400, "Expected 400, got " + response.status); });
+%}
+
+### 37. Allowed frontend CORS preflight — no token
+OPTIONS {{host}}/bookings
+Origin: {{frontendOrigin}}
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: authorization,content-type
+
+> {%
+  client.test("HTTP 200", function () { client.assert(response.status === 200, "Expected 200, got " + response.status); });
+  client.test("Exact origin, no cookie credentials", function () {
+    client.assert(response.headers.valueOf("Access-Control-Allow-Origin") === request.environment.get("frontendOrigin"));
+    client.assert(!response.headers.valueOf("Access-Control-Allow-Credentials"));
+  });
+%}
+
+### 38. Unknown origin CORS preflight — 403
+OPTIONS {{host}}/bookings
+Origin: https://untrusted.example
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: authorization,content-type
+
+> {%
+  client.test("HTTP 403", function () { client.assert(response.status === 403, "Expected 403, got " + response.status); });
+  client.test("Unknown origin not allowed", function () { client.assert(!response.headers.valueOf("Access-Control-Allow-Origin")); });
+%}
+
+# Additional manual checks:
+# - With a second GUEST account, GET or cancel bookingAId/bookingBId -> 404.
+# - An expired access token -> 401; a valid role without its scope -> 403.
+# - Guest cancellation within one hour of a reservation -> 409 (time-dependent).
+# - The full role/endpoint matrix and concurrent changes are exercised by mvn test.

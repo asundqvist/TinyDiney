@@ -6,6 +6,7 @@
 .env.*
 **/.env
 **/.env.*
+http-client.private.env.json
 node_modules
 target
 dist

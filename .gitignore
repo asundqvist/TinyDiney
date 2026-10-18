@@ -975,3 +975,4 @@ EdugradeBrandManualv2.0.pdf
 dist/
 .env.local
 .env.*.local
+http-client.private.env.json
