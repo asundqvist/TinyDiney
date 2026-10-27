@@ -1,87 +1,102 @@
-# Inlämningsuppgift: Java Web Services
+# 🍽️ TinyDiney
 
-Forka det här repot. Allt du behöver finns här.
+**A family-friendly restaurant booking platform built with React and Spring Boot.**
 
-## Läs först
+TinyDiney lets families explore fictional, child-friendly restaurants and request table reservations. The application includes a React frontend, a secured REST API, role-based access control and a MySQL database.
 
-1. **[requirements.md](requirements.md)** är uppgiften. Den innehåller fyra delar, kraven för G och VG samt datum.
-2. **[skriftliga_fragor.md](skriftliga_fragor.md)** innehåller de fem frågorna i del 4.
+## Features
 
-Deadline är onsdag den 14 oktober 2026 kl. 08.00. Muntlig redovisning sker onsdagen den 14 oktober 2026.
+- Browse 12 demo restaurants with search, filters and pagination.
+- Sign in securely using Auth0.
+- Request, view and cancel restaurant reservations.
+- Manage bookings as **STAFF** or **ADMIN**.
+- Add and edit restaurants as **ADMIN**.
+- Track reservations using unique booking references.
 
-## Vad som redan finns
+*All restaurants, dishes and prices are fictional. Reservations are for tables, not food orders.*
 
-Ett tomt Spring Boot-projekt. Det innehåller Spring Web och ingenting annat, så att du slipper börja med en tom mapp och själv kan välja alla beroenden som du lägger till.
+## Tech stack
 
-```text
-pom.xml                          Spring Boot 4.1.0, Java 25
-requests.http                    färdiga anrop mot API:et
-src/main/java/.../restaurant/
-    RestaurantApiApplication.java
-    HealthController.java        GET /health, svarar {"status":"UP"}
-src/main/resources/
-    application.yaml             appnamn och port
-src/test/java/.../restaurant/
-    RestaurantApiApplicationTests.java
-```
+| Frontend | Backend | Database & security |
+|---|---|---|
+| React 19, Vite 7 | Java 25, Spring Boot 4.1 | MySQL 8.4, Auth0, JWT |
 
-`HealthController` är inte en del av uppgiften. Behåll den för en snabb kontroll efter en deploy, eller radera den när du har egna endpoints.
+Additional technologies include Spring Data JPA, Hibernate, Swagger UI, JUnit, RestAssured, Docker, Caddy and Railway.
 
-## Kom igång
+## Getting started
 
-```bash
-mvn spring-boot:run
-```
+**Requirements:** JDK 25, Maven 3.9+, Node.js 22.12+ or 24, and Docker Compose.
 
-I ett annat fönster:
+1. Create a local environment file:
 
-```bash
-curl localhost:8080/health
-```
+   ```powershell
+   Copy-Item .env.example .env
+   ```
 
-Du ska få tillbaka `{"status":"UP","service":"restaurant-api"}`. Om du får det fungerar din miljö, och du kan börja med del 1.
+2. Configure database passwords and Auth0 settings in `.env`. See [Auth0 setup](AUTH0_SETUP.md).
 
-Kör testerna med:
+3. Start the database:
 
-```bash
+   ```powershell
+   docker compose up -d --wait --wait-timeout 180
+   ```
+
+4. Start the backend:
+
+   ```powershell
+   mvn spring-boot:run "-Dspring-boot.run.profiles=mysql"
+   ```
+
+5. Start the frontend in another terminal:
+
+   ```powershell
+   npm.cmd ci
+   npm.cmd run dev
+   ```
+
+**Local URLs:** [Frontend](http://localhost:5173) · [Swagger UI](http://localhost:8080/swagger-ui/index.html) · [Health](http://localhost:8080/health)
+
+On macOS/Linux, use `npm` instead of `npm.cmd`. Configure Auth0 before testing authenticated bookings.
+
+<details>
+<summary><strong>API overview</strong></summary>
+
+The API supports restaurant browsing and administration, reservation requests, booking status transitions and cancellations.
+
+Reservation lifecycle:
+
+`REQUESTED → CONFIRMED → SEATED`
+
+Reservations can also be cancelled while eligible.
+
+The API uses JWT authentication, role and scope checks, ETags and optimistic locking.
+
+For detailed endpoints and example requests, see [API documentation and demonstration](README_TinyDiney.md#api).
+
+</details>
+
+<details>
+<summary><strong>Tests and build</strong></summary>
+
+```powershell
 mvn test
+npm.cmd test
+npm.cmd run build
 ```
 
-## requests.http
+Backend tests cover authorization, reservation ownership, validation, pagination, cancellation and concurrency. Frontend tests cover selected logic and components.
 
-I `requests.http` finns anropen mot API:et. Öppna filen i IntelliJ och klicka på den gröna pilen till vänster om ett anrop, eller installera tillägget REST Client i VS Code.
+</details>
 
-Endast hälsokontrollen fungerar i det utdelade projektet. Resten är bortkommenterad, med ett anrop per krav i uppgiften, och du tar fram dem allteftersom du bygger. Anropen visar också vad som ska hända, till exempel att en okänd bokning ger 404 som `problem+json` och att en gäst som försöker bekräfta får 403 i stället för 401.
+## Documentation
 
-Byt ut `@host` överst i filen mot URL:en till din driftsatta tjänst inför redovisningen. Då har du en färdig demo i stället för att behöva skriva curl-kommandon inför publik.
+- [Full project documentation](README_TinyDiney.md)
+- [Frontend](FRONTEND.md)
+- [Authentication and authorization](AUTH0_SETUP.md)
+- [Database](DATABASE.md)
+- [Deployment](DEPLOYMENT.md)
+- [API demonstration](requests.http)
 
-## Beroenden du själv lägger till
+## Project scope
 
-Ingenting utöver Spring Web finns i `pom.xml`. Du lägger själv till det du behöver, del för del.
-
-För del 1 behöver du persistens, validering, HATEOAS och springdoc. För del 2 behöver du RestAssured och en mockningsmodul. För del 3 behöver du Spring Security som resource server. Kapitlen visar exakt vilka artefakter det gäller.
-
-## Fyra fällor som kostar timmar
-
-Det här är sådant som inte syns i ett felmeddelande och som du inte lär dig något av att fastna på.
-
-**1. `ProblemDetail` är avstängt som standard.** Del 1 kräver att ett okänt id ger 404 som `problem+json`. Spring Boot svarar med en tom body tills du lägger till följande i `application.yaml`:
-
-```yaml
-spring:
-  mvc:
-    problemdetails:
-      enabled: true
-```
-
-**2. Boot 4 delade upp testmodulerna.** `spring-boot-starter-test` innehåller inte längre allt. `@WebMvcTest` kräver `spring-boot-webmvc-test`, `@DataJpaTest` kräver `spring-boot-data-jpa-test`, och `TestRestTemplate` kräver både `spring-boot-resttestclient` och `spring-boot-restclient`. Alla ska ha `test`-scope. Om de saknas får du ett annotationsfel som ser ut som ett stavfel.
-
-**3. Jackson 3 bytte paket.** Importerna heter `tools.jackson.*`, inte `com.fasterxml.jackson.*`. Om du kopierar en kodsnutt från nätet är den nästan alltid skriven för Jackson 2.
-
-**4. `/health` låses när du lägger till säkerhet i del 3.** Din hostingplattform pingar oftast en hälsoendpoint för att avgöra om tjänsten är igång. Om den svarar med 401 stängs din deploy ner. Släpp uttryckligen igenom den i din `SecurityFilterChain`.
-
-## Frivilligt: en frontend
-
-Du får bygga en frontend och vibe-koda den. Den bedöms inte, men CORS i del 3 blir mycket mer konkret när en riktig sida på en annan origin anropar ditt API. Dessutom får du något annat än Swagger UI att visa under redovisningen.
-
-**Lycka till**
+TinyDiney is a demonstration project. Restaurant availability is not capacity-checked, booking notifications are simulated, and some account preferences are stored locally in the browser.
