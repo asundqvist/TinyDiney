@@ -33,7 +33,7 @@ Additional technologies include Spring Data JPA, Hibernate, Swagger UI, JUnit, R
    Copy-Item .env.example .env
    ```
 
-2. Configure database passwords and Auth0 settings in `.env`. See [Auth0 setup](AUTH0_SETUP.md).
+2. Configure database passwords and Auth0 settings in `.env`. See [Auth0 setup](docs/AUTH0_SETUP.md).
 
 3. Start the database:
 
@@ -71,7 +71,7 @@ Reservations can also be cancelled while eligible.
 
 The API uses JWT authentication, role and scope checks, ETags and optimistic locking.
 
-For detailed endpoints and example requests, see [API documentation and demonstration](README_TinyDiney.md#api).
+For detailed endpoints and example requests, see [API documentation and demonstration](docs/README_TinyDiney.md#api).
 
 </details>
 
@@ -90,11 +90,11 @@ Backend tests cover authorization, reservation ownership, validation, pagination
 
 ## Documentation
 
-- [Full project documentation](README_TinyDiney.md)
-- [Frontend](FRONTEND.md)
-- [Authentication and authorization](AUTH0_SETUP.md)
-- [Database](DATABASE.md)
-- [Deployment](DEPLOYMENT.md)
+- [Full project documentation](docs/README_TinyDiney.md)
+- [Frontend](docs/FRONTEND.md)
+- [Authentication and authorization](docs/AUTH0_SETUP.md)
+- [Database](docs/DATABASE.md)
+- [Deployment](docs/DEPLOYMENT.md)
 - [API demonstration](requests.http)
 
 ## Project scope

@@ -2,12 +2,12 @@
 # Select local or railway from http-client.env.json.
 # Put guestToken, staffToken and adminToken in http-client.private.env.json
 # under the matching environment. Use three different user accounts.
-# Tokens must be fresh API access tokens with the scopes in AUTH0_SETUP.md.
+# Tokens must be fresh API access tokens with the scopes in docs/AUTH0_SETUP.md.
 #
 # Run numbered requests IN ORDER. Response handlers retain generated IDs/ETag.
 # This creates one demo restaurant and three bookings; it deletes no records.
 # Default to local. Railway mutation requests also persist data.
-# See README_TinyDiney.md for setup. Scripts target IntelliJ's HTTP Client.
+# See docs/README_TinyDiney.md for setup. Scripts target IntelliJ's HTTP Client.
 
 
 ### 01. Public health — 200

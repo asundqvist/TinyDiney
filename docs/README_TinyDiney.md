@@ -1,4 +1,4 @@
-﻿# TinyDiney
+# TinyDiney
 
 TinyDiney is a restaurant booking platform for families with children. It brings together fictional restaurants with child-friendly signature dishes, from pancakes and meatballs to fish and chips.
 
@@ -101,9 +101,9 @@ Creation returns 201 with a Location header. Unknown or inaccessible booking IDs
 
 ## Demonstrate the API
 
-[requests.http](requests.http) contains ordered IntelliJ HTTP Client requests with response assertions for the lifecycle, pagination, ETag, authorization, validation and CORS.
+[requests.http](../requests.http) contains ordered IntelliJ HTTP Client requests with response assertions for the lifecycle, pagination, ETag, authorization, validation and CORS.
 
-1. Select `local` in the HTTP Client environment selector. Public values are in [http-client.env.json](http-client.env.json).
+1. Select `local` in the HTTP Client environment selector. Public values are in [http-client.env.json](../http-client.env.json).
 2. Create `http-client.private.env.json` locally:
 
    ```json
@@ -143,7 +143,7 @@ Frontend tests cover shared logic and selected rendered components, not a full b
 - [Authentication and authorization](AUTH0_SETUP.md)
 - [Database](DATABASE.md)
 - [Railway deployment](DEPLOYMENT.md)
-- [API demonstration requests](requests.http)
+- [API demonstration requests](../requests.http)
 
 ## Current scope
 

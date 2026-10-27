@@ -4,8 +4,8 @@ Forka det här repot. Allt du behöver finns här.
 
 ## Läs först
 
-1. **[requirements.md](requirements.md)** är uppgiften. Den innehåller fyra delar, kraven för G och VG samt datum.
-2. **[skriftliga_fragor.md](skriftliga_fragor.md)** innehåller de fem frågorna i del 4.
+1. **[requirements.md](../requirements.md)** är uppgiften. Den innehåller fyra delar, kraven för G och VG samt datum.
+2. **[skriftliga_fragor.md](../skriftliga_fragor.md)** innehåller de fem frågorna i del 4.
 
 Deadline är onsdag den 14 oktober 2026 kl. 08.00. Muntlig redovisning sker onsdagen den 14 oktober 2026.
 
